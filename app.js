@@ -1,10 +1,13 @@
 // app.js
 const express = require('express');
 const mysql = require('mysql2');
+const path = require('path');
+const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
 const port = 3000;
+app.use(cors());
 
 const db = mysql.createConnection({
     host: process.env.DB_HOST,
@@ -22,6 +25,12 @@ db.connect((err) => {
     }
 });
 
+app.get('/', (req, res) => {
+    console.log('Request Readme.md');
+    const filePath = path.join(__dirname, "Readme.md");
+    res.sendFile(filePath);
+});
+
 app.get('/meal', (req, res) => {
     const { date, type } = req.query;
     if (!date || !type) {
@@ -36,8 +45,10 @@ app.get('/meal', (req, res) => {
             return res.status(500).send('Server error occured.');
         }
         if (results.length === 0) {
+            console.log("404 request");
             return res.status(404).send('404: no date');
         }
+        console.log('response successfully, date:', date, ", type:", type);
         res.json(results[0]); 
     });
 });
